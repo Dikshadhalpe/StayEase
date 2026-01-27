@@ -1,8 +1,8 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const listing = require("./models/listing.js");
-
+const Listing = require("./models/listing.js");
+const path = require("path");
 
 
 const MONGOURL = "mongodb://127.0.0.1:27017/StayEase";
@@ -17,24 +17,10 @@ async function main() {
     await mongoose.connect(MONGOURL);
 
 }
-//Test listing
-app.get("/testListing", async (req, res) => {
-    let samplist = new listing({
-        title: "My new villa",
-        desc: "At the beach",
-        price: 1200,
-        location: "pune",
-        country: "india",
 
-    });
-    await samplist.save();
-    console.log("Sample was saved succefully");
-    res.send("Test Succes");
-});
-
-
-
-
+app.set("vivew engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.urlencoded({ extended: true }));
 
 
 
@@ -43,6 +29,27 @@ app.get("/", (req, res) => {
     res.send("I am  root 8080");
 });
 
+//index Route
+app.get("/listings", async (req, res) => {
+    const allListings = await Listing.find({});
+    res.render("listings/index.ejs", { allListings });
+});
+//New route
+app.get("/listings/new", (req, res) => {
+    res.render("listings/new.ejs");
+});
+
+//show route
+app.get("/listings/:id", async (req, res) => {
+    let { id } = req.params;
+    const listing = await Listing.findById(id);
+    res.render("listings/show.ejs", { listing });
+});
+
+
+
+
+//Server listening and starting of a server
 app.listen(8080, () => {
     console.log("Server is listening to port 8080");
 });

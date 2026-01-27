@@ -6,15 +6,22 @@ const listingSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    desc: String,
-    img: {
-        type: String,
-        set: (v) => v === " " ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRP8yGuDDBINqOdIbbrUVrBZvNwCTQMp_0ZCg&s" : v,
+    description: String,
+    image: {
+        filename: {
+            type: String,
+            default: "listingimage",
+        },
+        url: {
+            type: String,
+            default:
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRP8yGuDDBINqOdIbbrUVrBZvNwCTQMp_0ZCg&s",
+        },
     },
     price: Number,
     location: String,
     Country: String,
 });
 
-const listing = mongoose.model("listing", listingSchema);
-module.export = listing;
+const Listing = mongoose.model("Listing", listingSchema);
+module.exports = Listing;
