@@ -143,3 +143,9 @@
     border: none !important;
 
 }
+
+/* Edit page */
+.edit-btn {
+    background-color: #ff385c !important;
+    border: none !important;
+}
