@@ -95,12 +95,12 @@ app.use((req, res) => {
 });
 
 
-
 app.use((err, req, res, next) => {
-    let { statusCode = 500, message = "Something Went Wrong" } = err;
-    res.status(statusCode).send(message);
-
+    const { statusCode = 500, message = "Something Went Wrong" } = err;
+    console.log(err);
+    // res.status(statusCode).render("error.ejs", { err });
 });
+
 
 //Server listening and starting of a server
 app.listen(8080, () => {

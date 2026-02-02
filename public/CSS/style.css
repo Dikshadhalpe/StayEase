@@ -33,7 +33,7 @@
 .footer {
     background-color: #f8f9fa;
     padding: 1.5rem 0;
-    margin-top: 1rem;
+
     border-top: 1px solid #e5e7eb;
 }
 
@@ -113,6 +113,8 @@
 .card {
     border: none !important;
     margin-bottom: 3rem;
+    overflow: visible;
+
 
 }
 
