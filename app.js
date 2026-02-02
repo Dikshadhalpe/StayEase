@@ -5,6 +5,10 @@ const Listing = require("./models/listing.js");
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+const wrapAsync = require("./utils/wrapAsync.js");
+const ExpressError = require("./utils/ExpressError.js");
+
+
 
 const MONGOURL = "mongodb://127.0.0.1:27017/StayEase";
 main()
@@ -37,6 +41,7 @@ app.get("/listings", async (req, res) => {
     const allListings = await Listing.find({});
     res.render("listings/index.ejs", { allListings });
 });
+
 //New route
 app.get("/listings/new", (req, res) => {
     res.render("listings/new.ejs");
@@ -51,12 +56,14 @@ app.get("/listings/:id", async (req, res) => {
 });
 
 //create route
-app.post("/listings", async (req, res) => {
+app.post("/listings", wrapAsync(async (req, res, next) => {
+    if (!req.body.listings) {
+        throw new ExpressError(400, "Send Valid Data for Listing");
+    }
     const newListing = new Listing(req.body.listing);
     await newListing.save();
     res.redirect("/listings");
-
-});
+}));
 
 //Edit route
 app.get("/listings/:id/edit", async (req, res) => {
@@ -74,12 +81,27 @@ app.put("/listings/:id", async (req, res) => {
 });
 
 //delete route
-app.delete("/listings/:id", async (req, res) => {
+app.delete("/listings/:id", wrapAsync(async (req, res) => {
     let { id } = req.params;
     let delListing = await Listing.findByIdAndDelete(id);
     console.log(delListing);
     res.redirect("/listings");
-})
+}));
+
+
+//Middleware-handling Errors
+app.use((req, res) => {
+    res.status(404).render("Page Not Found");
+});
+
+
+
+app.use((err, req, res, next) => {
+    let { statusCode = 500, message = "Something Went Wrong" } = err;
+    res.status(statusCode).send(message);
+
+});
+
 //Server listening and starting of a server
 app.listen(8080, () => {
     console.log("Server is listening to port 8080");
