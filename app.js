@@ -98,11 +98,12 @@ app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
 }));
 
 //delete route
-app.delete("/listings/:id", wrapAsync(async (req, res) => {
+app.delete("/listings/:id", wrapAsync(async (req, res, next) => {
     let { id } = req.params;
     let delListing = await Listing.findByIdAndDelete(id);
     console.log(delListing);
     res.redirect("/listings");
+    // res.send("Deleted Succesfully");
 }));
 
 
