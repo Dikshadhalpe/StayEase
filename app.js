@@ -7,7 +7,7 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
-
+const { listingSchema } = require("./schema.js");
 
 
 const MONGOURL = "mongodb://127.0.0.1:27017/StayEase";
@@ -23,7 +23,7 @@ async function main() {
 
 }
 
-app.set("vivew engine", "ejs");
+app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
@@ -35,6 +35,22 @@ app.use(express.static(path.join(__dirname, "/public")));
 app.get("/", (req, res) => {
     res.send("I am  root 8080");
 });
+
+//function for validate listing
+const validateListing = (req, res, next) => {
+    let { error } = listingSchema.validate(req.body);
+    console.log(error);
+    if (error) {
+        let ermsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, ermsg);
+    }
+    else {
+        next();
+    }
+}
+
+
+
 
 //index Route
 app.get("/listings", async (req, res) => {
@@ -56,14 +72,15 @@ app.get("/listings/:id", async (req, res) => {
 });
 
 //create route
-app.post("/listings", wrapAsync(async (req, res, next) => {
-    if (!req.body.listings) {
-        throw new ExpressError(400, "Send Valid Data for Listing");
-    }
+app.post("/listings", validateListing, wrapAsync(async (req, res, next) => {
     const newListing = new Listing(req.body.listing);
     await newListing.save();
     res.redirect("/listings");
-}));
+})
+);
+
+
+
 
 //Edit route
 app.get("/listings/:id/edit", async (req, res) => {
@@ -73,12 +90,12 @@ app.get("/listings/:id/edit", async (req, res) => {
 });
 
 //update route
-app.put("/listings/:id", async (req, res) => {
+app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
     let { id } = req.params;
     await Listing.findByIdAndUpdate(id, { ...req.body.listing });
     res.redirect("/listings");
 
-});
+}));
 
 //delete route
 app.delete("/listings/:id", wrapAsync(async (req, res) => {
@@ -91,14 +108,15 @@ app.delete("/listings/:id", wrapAsync(async (req, res) => {
 
 //Middleware-handling Errors
 app.use((req, res) => {
-    res.status(404).render("Page Not Found");
+    res.status(404).render("error.ejs", {
+        err: { message: "Page Not Found", statusCode: 404 }
+    });
 });
 
 
 app.use((err, req, res, next) => {
     const { statusCode = 500, message = "Something Went Wrong" } = err;
-    console.log(err);
-    // res.status(statusCode).render("error.ejs", { err });
+    res.status(statusCode).render("error.ejs", { err });
 });
 
 
