@@ -8,6 +8,8 @@ const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
 const { listingSchema } = require("./schema.js");
+const Review = require("./models/review.js");
+
 
 
 const MONGOURL = "mongodb://127.0.0.1:27017/StayEase";
@@ -79,9 +81,6 @@ app.post("/listings", validateListing, wrapAsync(async (req, res, next) => {
 })
 );
 
-
-
-
 //Edit route
 app.get("/listings/:id/edit", async (req, res) => {
     let { id } = req.params;
@@ -105,6 +104,20 @@ app.delete("/listings/:id", wrapAsync(async (req, res, next) => {
     res.redirect("/listings");
     // res.send("Deleted Succesfully");
 }));
+
+//reviews Route for posting 
+app.post("/listings/:id/reviews", async (req, res) => {
+    let listing = await Listing.findById(req.params.id);
+    let newReview = new Review(req.body.review);
+
+    listing.review.push(newReview);
+    await newReview.save();
+    await listing.save();
+
+
+    res.redirect(`/listings/${listing.id}`);
+
+});
 
 
 //Middleware-handling Errors

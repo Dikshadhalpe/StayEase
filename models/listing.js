@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
 const listingSchema = new mongoose.Schema({
     title: {
@@ -21,6 +21,13 @@ const listingSchema = new mongoose.Schema({
     price: Number,
     location: String,
     country: String,
+    review: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Review",
+        },
+    ],
+
 });
 
 const Listing = mongoose.model("Listing", listingSchema);

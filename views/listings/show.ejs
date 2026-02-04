@@ -2,7 +2,7 @@
     <div class="row mt-3">
         <div class="col-8 offset-3">
             <h3>
-                Listing Details
+                <%=listing.title%>
             </h3>
         </div>
         <div class="card col-6 offset-3 show-card">
@@ -20,12 +20,26 @@
                 </p>
             </div>
         </div>
-        <br />
-    </div>
-    <div class="btns">
-        <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark col-2 offset-3 edit-btn">Edit </a>
+        <div class="btns">
+            <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark col-2 offset-3 edit-btn">Edit </a>
 
-        <form method="POST" action="/listings/<%= listing._id%>?_method=delete">
-            <Button class="btn btn-dark offset-5">Delete</Button>
-        </form>
+            <form method="POST" action="/listings/<%= listing._id%>?_method=delete">
+                <Button class="btn btn-dark offset-5">Delete</Button>
+            </form>
+        </div>
+        <div class="col-8 offset-3">
+            <hr />
+            <h4>Review</h4>
+            <form class="mb-3" action="/listings/<%= listing._id %>/reviews" method="POST">
+                <div class="mb-3 mt-3">
+                    <label for="rating" class="form-label">Rating</label>
+                    <input type="range" min="1" max="5" id="rating" name="review[rating]" class="form-range">
+                </div>
+                <div class="mb-3 mt-3">
+                    <label for="comment" class="form-label">Comment</label>
+                    <textarea name="review[comment]" id="comment" class="form-control" cols="30" rows="5"></textarea>
+                </div>
+                <button class=" btn btn-outline-dark">Submit</button>
+            </form>
+        </div>
     </div>
