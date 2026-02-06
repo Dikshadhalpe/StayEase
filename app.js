@@ -9,7 +9,7 @@ const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
 const { listingSchema } = require("./schema.js");
 const Review = require("./models/review.js");
-
+const { reviewSchema } = require("./schema.js");
 
 
 const MONGOURL = "mongodb://127.0.0.1:27017/StayEase";
@@ -51,7 +51,17 @@ const validateListing = (req, res, next) => {
     }
 }
 
-
+const validateReview = (req, res, next) => {
+    let { error } = reviewSchema.validate(req.body);
+    console.log(error);
+    if (error) {
+        let ermsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, ermsg);
+    }
+    else {
+        next();
+    }
+}
 
 
 //index Route
@@ -68,8 +78,8 @@ app.get("/listings/new", (req, res) => {
 
 //show route
 app.get("/listings/:id", async (req, res) => {
-    let { id } = req.params;
-    const listing = await Listing.findById(id);
+    // let { id } = req.params;
+    const listing = await Listing.findById(req.params.id).populate("review");
     res.render("listings/show.ejs", { listing });
 });
 
@@ -100,13 +110,13 @@ app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
 app.delete("/listings/:id", wrapAsync(async (req, res, next) => {
     let { id } = req.params;
     let delListing = await Listing.findByIdAndDelete(id);
-    console.log(delListing);
     res.redirect("/listings");
     // res.send("Deleted Succesfully");
 }));
 
 //reviews Route for posting 
-app.post("/listings/:id/reviews", async (req, res) => {
+
+app.post("/listings/:id/reviews", validateReview, wrapAsync(async (req, res) => {
     let listing = await Listing.findById(req.params.id);
     let newReview = new Review(req.body.review);
 
@@ -117,7 +127,19 @@ app.post("/listings/:id/reviews", async (req, res) => {
 
     res.redirect(`/listings/${listing.id}`);
 
-});
+}));
+
+//delete route of reviews
+app.delete("/listings/:id/reviews/:reviewId", wrapAsync(async (req, res) => {
+    let { id, reviewId } = req.params;
+
+    // console.log(id);
+    // console.log(reviewId);
+    await Listing.findByIdAndUpdate(id, { $pull: { review: reviewId } });  //pull id mongo operator used to delete specific matched condtion from an array
+    await Review.findByIdAndDelete(reviewId);
+
+    res.redirect(`/listings/${id}`);
+}));
 
 
 //Middleware-handling Errors
@@ -126,6 +148,7 @@ app.use((req, res) => {
         err: { message: "Page Not Found", statusCode: 404 }
     });
 });
+
 
 
 app.use((err, req, res, next) => {
