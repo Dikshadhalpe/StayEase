@@ -1,15 +1,12 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const Listing = require("./models/listing.js");
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
-const wrapAsync = require("./utils/wrapAsync.js");
-const ExpressError = require("./utils/ExpressError.js");
-const { listingSchema } = require("./schema.js");
-const Review = require("./models/review.js");
-const { reviewSchema } = require("./schema.js");
+const listings = require("./routes/listing.js");
+const reviews = require("./routes/review.js");
+
 
 
 const MONGOURL = "mongodb://127.0.0.1:27017/StayEase";
@@ -38,108 +35,13 @@ app.get("/", (req, res) => {
     res.send("I am  root 8080");
 });
 
-//function for validate listing
-const validateListing = (req, res, next) => {
-    let { error } = listingSchema.validate(req.body);
-    console.log(error);
-    if (error) {
-        let ermsg = error.details.map((el) => el.message).join(",");
-        throw new ExpressError(400, ermsg);
-    }
-    else {
-        next();
-    }
-}
-
-const validateReview = (req, res, next) => {
-    let { error } = reviewSchema.validate(req.body);
-    console.log(error);
-    if (error) {
-        let ermsg = error.details.map((el) => el.message).join(",");
-        throw new ExpressError(400, ermsg);
-    }
-    else {
-        next();
-    }
-}
 
 
-//index Route
-app.get("/listings", async (req, res) => {
-    const allListings = await Listing.find({});
-    res.render("listings/index.ejs", { allListings });
-});
 
-//New route
-app.get("/listings/new", (req, res) => {
-    res.render("listings/new.ejs");
-});
+// Accesing the path through router
+app.use("/listings", listings);
+app.use("/listings/:id/reviews", reviews);
 
-
-//show route
-app.get("/listings/:id", async (req, res) => {
-    // let { id } = req.params;
-    const listing = await Listing.findById(req.params.id).populate("review");
-    res.render("listings/show.ejs", { listing });
-});
-
-//create route
-app.post("/listings", validateListing, wrapAsync(async (req, res, next) => {
-    const newListing = new Listing(req.body.listing);
-    await newListing.save();
-    res.redirect("/listings");
-})
-);
-
-//Edit route
-app.get("/listings/:id/edit", async (req, res) => {
-    let { id } = req.params;
-    const listing = await Listing.findById(id);
-    res.render("listings/edit.ejs", { listing });
-});
-
-//update route
-app.put("/listings/:id", validateListing, wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-    res.redirect("/listings");
-
-}));
-
-//delete route
-app.delete("/listings/:id", wrapAsync(async (req, res, next) => {
-    let { id } = req.params;
-    let delListing = await Listing.findByIdAndDelete(id);
-    res.redirect("/listings");
-    // res.send("Deleted Succesfully");
-}));
-
-//reviews Route for posting 
-
-app.post("/listings/:id/reviews", validateReview, wrapAsync(async (req, res) => {
-    let listing = await Listing.findById(req.params.id);
-    let newReview = new Review(req.body.review);
-
-    listing.review.push(newReview);
-    await newReview.save();
-    await listing.save();
-
-
-    res.redirect(`/listings/${listing.id}`);
-
-}));
-
-//delete route of reviews
-app.delete("/listings/:id/reviews/:reviewId", wrapAsync(async (req, res) => {
-    let { id, reviewId } = req.params;
-
-    // console.log(id);
-    // console.log(reviewId);
-    await Listing.findByIdAndUpdate(id, { $pull: { review: reviewId } });  //pull id mongo operator used to delete specific matched condtion from an array
-    await Review.findByIdAndDelete(reviewId);
-
-    res.redirect(`/listings/${id}`);
-}));
 
 
 //Middleware-handling Errors
@@ -148,7 +50,6 @@ app.use((req, res) => {
         err: { message: "Page Not Found", statusCode: 404 }
     });
 });
-
 
 
 app.use((err, req, res, next) => {
