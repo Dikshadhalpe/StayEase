@@ -31,10 +31,14 @@ const listingSchema = new mongoose.Schema({
 
 });
 
-listingSchema.post("findOneAndDelete", async (listing) => {
-    if (listing) {
-        await Review.deleteMany({ _id: { $in: listing.reviews } });
-    }
+listingSchema.post("findOneAndDelete", async function (listing) {
+    if (!listing) return;
+
+    console.log("Deleting reviews for listing:", listing._id);
+
+    await Review.deleteMany({
+        _id: { $in: listing.review }
+    });
 });
 
 
