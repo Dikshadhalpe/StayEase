@@ -33,7 +33,7 @@ router.post("/", validateReview, wrapAsync(async (req, res) => {
     await newReview.save();
     await listing.save();
 
-
+    req.flash("success", "New Review Added");
     res.redirect(`/listings/${listing.id}`);
 
 }));
@@ -46,7 +46,7 @@ router.delete("/:reviewId", wrapAsync(async (req, res) => {
     // console.log(reviewId);
     await Listing.findByIdAndUpdate(id, { $pull: { review: reviewId } });  //pull id mongo operator used to delete specific matched condtion from an array
     await Review.findByIdAndDelete(reviewId);
-
+    req.flash("success", "Review Deleted!");
     res.redirect(`/listings/${id}`);
 }));
 
