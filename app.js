@@ -42,12 +42,12 @@ app.use(express.static(path.join(__dirname, "/public")));
 const sessionOptions = {
     secret: "mysupersecretcode",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
-        expires: Date.now() * 7 * 24 * 60 * 60 * 1000,
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-    },
+    }
 };
 
 
@@ -70,16 +70,6 @@ app.use((req, res, next) => {
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     next();
-});
-
-//Demo User
-app.get("/demouser", async (req, res) => {
-    let fakeUser = new User({
-        email: "abc24@gmail.com",
-        username: "abc24"
-    });
-    let registerUser = await User.register(fakeUser, "helloworld");
-    res.send(registerUser);
 });
 
 
