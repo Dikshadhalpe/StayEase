@@ -15,14 +15,16 @@ router.post("/signup", wrapAsync(async (req, res) => {
         let { username, email, password } = req.body;
 
         const newUser = new User({ email, username });
-        await User.register(newUser, password);
-
-        req.flash("success", "Welcome to StayEase");
-
-        return res.redirect("/listings");
-
+        const registerUser = await User.register(newUser, password);
+        req.login(registerUser, (err) => {
+            if (err) {
+                return next(err);
+            }
+        })
+        req.flash("success", "Login into StayEase");
+        res.redirect("/listings");
     } catch (e) {
-        req.flash("error", "User Already Registered");
+        req.flash("error", e.message);
         return res.redirect("/signup");
     }
 }));
@@ -57,5 +59,14 @@ router.post(
     }
 );
 
+router.get("/logout", (req, res, next) => {
+    req.logout((err) => {
+        if (err) {
+            return next(err);
+        }
+        req.flash("success", "You are logged Out Now");
+        res.redirect("/listings");
+    });
+});
 
 module.exports = router;
