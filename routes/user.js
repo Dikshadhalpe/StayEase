@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require("../models/user.js");
 const wrapAsync = require("../utils/wrapAsync.js");
 const passport = require("passport");
+const { saveRedirectUrl } = require("../middleware.js");
 
 router.get("/signup", (req, res) => {
     res.render("users/signup.ejs");
@@ -10,7 +11,8 @@ router.get("/signup", (req, res) => {
 
 
 //Post route for signup
-router.post("/signup", wrapAsync(async (req, res) => {
+router.post("/signup", 
+    wrapAsync(async (req, res) => {
     try {
         let { username, email, password } = req.body;
 
@@ -20,9 +22,10 @@ router.post("/signup", wrapAsync(async (req, res) => {
             if (err) {
                 return next(err);
             }
-        })
         req.flash("success", "Login into StayEase");
         res.redirect("/listings");
+        });
+       
     } catch (e) {
         req.flash("error", e.message);
         return res.redirect("/signup");
@@ -36,26 +39,17 @@ router.get("/login", (req, res) => {
 });
 
 
-// router.post(
-//     "/login",
-//     passport.authenticate("local", {
-//         failureRedirect: '/login',
-//         failureFlash: true
-//     }),
-//     (req, res) => {
-//         res.send("welcome to StayEase");
-//     }
-// );
 //Psot Login 
 router.post(
     "/login",
+    saveRedirectUrl,
     passport.authenticate("local", {
         failureRedirect: "/login",
         failureFlash: true
     }),
     async (req, res) => {
         req.flash("success", "Logged in successfully");
-        res.redirect("/listings");
+        res.redirect(res.locals.redirectUrl||"/listings");
     }
 );
 
