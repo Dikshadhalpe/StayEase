@@ -1,13 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
+<style>
+    .btn-search{
+        background-color: #ff385c ;
+        color:#fff;
+        border-radius: 25px;
+        padding: 0 1rem 0 1 rem;
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StayEase</title>
-</head>
-
-<body>
+    }
+     .btn-search:hover{
+        background-color: #ff385c ;
+        color:#fff;
+        
+    }
+    .btn-search i{
+        display: inline;
+        margin-right: 0.5rem;
+    }
+    .search-input{
+        border-radius: 20px;
+         padding: 0.5rem 3rem 0.5rem 3rem;
+         font-size: 0.8rem;
+   }
+</style>
     <nav class="navbar navbar-expand-lg bg-body-light border-bottom sticky-top shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand" href="/listings"> <i class="fa-solid fa-map-location-dot"></i></a>
@@ -18,6 +31,12 @@
                 <div class="navbar-nav">     
                     <a class="nav-link" href="/listings">Explore</a>
                     
+                </div>
+                <div class="navbar-nav ms-auto">
+                     <form class="d-flex" role="search">
+                        <input class="form-control me-2 search-input" type="search" placeholder="Search Destinations" aria-label="Search"/>
+                        <button class="btn btn-search" type="submit"><i class="fa-solid fa-magnifying-glass"></i>Search</button>
+                    </form>
                 </div>
                 <div class="navbar-nav ms-auto">
                     <a class="nav-link" href="/listings/new">Airbnb Your Home</a>
@@ -32,6 +51,3 @@
             </div>
         </div>
     </nav>
-</body>
-
-</html>
