@@ -9,9 +9,13 @@ router
     .route("/")
     .get( wrapAsync(listingController.index))
     .post( 
-    isLoggedIn, 
+    isLoggedIn,
+    // upload.single("listing[image]"),//multer process the data in req.file 
     validateListing, 
     wrapAsync(listingController.createListing));
+    
+
+   
 
 //New route
 router.get("/new", isLoggedIn,listingController.renderNewForm);

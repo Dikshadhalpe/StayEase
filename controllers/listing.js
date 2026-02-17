@@ -27,6 +27,7 @@ module.exports.showListing=async (req, res) => {
 
 module.exports.createListing=async (req, res, next) => {
     const newListing = new Listing(req.body.listing);
+    //Have to make changes for the new listing 
     newListing.owner=req.user._id;
     await newListing.save();
     req.flash("success", "New Listing Created");
