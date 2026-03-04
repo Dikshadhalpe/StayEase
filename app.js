@@ -1,3 +1,9 @@
+// Only load dotenv in development
+// if (process.env.NODE_ENV !== "production") {
+//   require("dotenv").config();
+// }
+require("dotenv").config();
+// const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -5,6 +11,7 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
+const MongoStore=require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -17,19 +24,30 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
 
-
-const MONGOURL = "mongodb://127.0.0.1:27017/StayEase";
+const db_url=process.env.ATLASDB_URL;
+// // / const MONGOURL = "mongodb://127.0.0.1:27017/StayEase";
+// console.log(db_url);
 main()
     .then(() => {
         console.log("Connected to DB");
     })
-    .catch(() => {
+    .catch((err) => {
         console.log(err);
-    })
+    });
 async function main() {
-    await mongoose.connect(MONGOURL);
+    await mongoose.connect(db_url);
 
 }
+// mongoose.connect(db_url)
+// .then(() => {
+//     console.log("DB Connected");
+//     // app.listen(8080, () => {
+//     //     console.log("Server running");
+//     // });
+// })
+// .catch(err => console.log(err));
+
+
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -51,9 +69,10 @@ const sessionOptions = {
 };
 
 
-app.get("/", (req, res) => {
-    res.send("I am  root 8080");
-});
+// app.get("/", (req, res) => {
+//     res.send("I am  root 8080");
+// });
+
 
 app.use(session(sessionOptions));
 app.use(flash());
@@ -96,7 +115,7 @@ app.use((err, req, res, next) => {
 });
 
 
-//Server listening and starting of a server
+// Server listening and starting of a server
 app.listen(8080, () => {
     console.log("Server is listening to port 8080");
 });
